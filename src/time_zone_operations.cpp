@@ -3,43 +3,44 @@
 #include <Arduino.h>
 
 void verifyTimeZone(sqlite3 *db1, int num_puce, char *num_state_p) {
-    // Implement the logic to verify time zone
-    /*---------------------------------------------------------------TIME_ZONE--------------------------------------------------------------*/
-    int rc;
-    int tableExists;
-    char* zErrMsg;
+    // Fetch time_zone data from the database
+    fetchTimeZoneData(db1, "SELECT * FROM time_zone WHERE id_puce = ?", num_puce);
 
-rc = sqlite3_exec(db1, "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='time_zone';", queryResultCallback, &tableExists, &zErrMsg);
-if (rc != SQLITE_OK) {
-    // problème
-    Serial.printf("Erreur lors de l'exécution de la requête SQL: %s\n", zErrMsg);
-    // En cas d'erreur, ferme la base de données et arrête l'exécution
-    sqlite3_free(zErrMsg);
-    sqlite3_close(db1);
-    return;
-} else {
-    // traitement
-    Serial.printf("Table existe (1 -> oui /0 -> non): %i\n", tableExists);
-    if (!tableExists) {
-        Serial.println("La table time_zone n'existe pas encore.");
-        rc = db_exec(db1, "CREATE TABLE time_zone (id_timezone INTEGER PRIMARY KEY NOT NULL, day_of_week TINYINT NOT NULL, entry_time TIME NOT NULL, exit_time TIME NOT NULL, id_puce INTEGER NOT NULL, FOREIGN KEY (id_puce) REFERENCES puce(id_puce));");
-        if (rc != SQLITE_OK) {
-            // prob de creation
-            sqlite3_close(db1);
-            return;
+    // Get the current time
+    unsigned long currentTime = millis() / 1000; // Assuming millis() returns milliseconds since startup
+    unsigned long currentTimeOfDay = currentTime % 86400; // Seconds since midnight
+
+    // Iterate through the fetched time_zone data
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int dayOfWeek = sqlite3_column_int(stmt, 1);
+        unsigned long entryTime = parseTimeString(sqlite3_column_text(stmt, 2)); // Parse entry_time string to seconds since midnight
+        unsigned long exitTime = parseTimeString(sqlite3_column_text(stmt, 3)); // Parse exit_time string to seconds since midnight
+
+        // Check if the current day matches the day_of_week in the time_zone table
+        if (dayOfWeek == getCurrentDayOfWeek()) {
+            // Check if the current time is within the authorized time range
+            if (currentTimeOfDay >= entryTime && currentTimeOfDay <= exitTime) {
+                // Access allowed
+                num_state_p += '1000'; // Set the access allowed flag in num_state_p
+                return;
+            }
         }
-        Serial.println("Creation done successfully");
     }
-    Serial.println("La table time_zone existe.");
-    rc = db_exec(db1, "INSERT INTO time_zone VALUES (11,2,'10:00:00','12:00:00',1);");
-    if (rc != SQLITE_OK) {
-        sqlite3_close(db1);
-        return;
-    }
-    rc = db_exec(db1, "SELECT * FROM time_zone");
-    if (rc != SQLITE_OK) {
-        sqlite3_close(db1);
-        return;
-    }
+
+    // Access denied
+    num_state_p += '0100'; // Set the unauthorized time zone flag in num_state_p
 }
+
+// Helper function to parse a time string in the format "HH:MM:SS" to seconds since midnight
+unsigned long parseTimeString(const char* timeString) {
+    int hours, minutes, seconds;
+    sscanf(timeString, "%d:%d:%d", &hours, &minutes, &seconds);
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
+// Helper function to get the current day of the week (1-7, where 1 is Monday and 7 is Sunday)
+int getCurrentDayOfWeek() {
+    // Implement a function to get the current day of the week based on your system's date/time
+    // This example assumes a simple implementation using millis()
+    return ((millis() / (24 * 3600 * 1000)) % 7) + 1;
 }

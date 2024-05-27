@@ -9,10 +9,19 @@
 #include <WiFi.h>
 #include "time.h"
 #include "db_operations.h"
-
+#include <PubSubClient.h>
+#include "mqtt_operations.h"
+#include "puce_operations.h"
+#include "time_zone_operations.h"
+#include "LEDControl.h" // Include your LED control library
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+const char* mqtt_server = "broker.hivemq.com";
+const int mqtt_port = 1883;
 
 const char* ssid = "Alaa's A34";
 const char* password = "1234567890";
@@ -22,10 +31,56 @@ const int daylightOffset_sec = 3600;
 sqlite3 *db1;
 
 void printLocalTime();
+void initWiFi();
+void initTime();
+void initFileSystem();
+void initMQTT();
+void initDatabase();
+void processRFIDData();
 
 void setup() {
     Serial.begin(115200);
-    // Connect to Wi-Fi
+    initWiFi();
+    initTime();
+    initFileSystem();
+    initMQTT();
+    initDatabase();
+}
+
+void loop() {
+    // Print the local time at the start of each loop iteration
+    printLocalTime();
+
+    // Delay for a second to pace the loop execution
+    delay(1000);
+
+    // Check if the MQTT client is connected
+    if (!client.connected()) {
+        Serial.println("Connecting to MQTT...");
+        setup_mqtt(client, mqtt_server, mqtt_port);
+    }
+
+    // Process incoming messages and maintain MQTT connection
+    client.loop();
+
+    // Process RFID data
+    processRFIDData();
+}
+
+void printLocalTime() {
+    char buf[64];
+    struct tm timeinfo;
+
+    if (!getLocalTime(&timeinfo)) {
+        Serial.println("Failed to obtain time");
+        return;
+    }
+    
+    strftime(buf, sizeof(buf), "%A, %B %d %Y %H:%M:%S", &timeinfo);
+    Serial.println(buf);
+}
+
+void initWiFi() {
     Serial.print("Connecting to ");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
@@ -34,40 +89,34 @@ void setup() {
         Serial.print(".");
     }
     Serial.println("WiFi connected.");
-    // Init and get the time
+}
+
+void initTime() {
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
     printLocalTime();
+}
 
-    if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED, "/littlefs"))
-    {
+void initFileSystem() {
+    if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED, "/littlefs")) {
         Serial.println("Failed to mount file system");
         return;
     }
 
-    
-
-    // list LITTLEFS contents
     File root = LittleFS.open("/");
-    if (!root)
-    {
+    if (!root) {
         Serial.println("- failed to open directory");
         return;
     }
-    if (!root.isDirectory())
-    {
+    if (!root.isDirectory()) {
         Serial.println(" - not a directory");
         return;
     }
     File file = root.openNextFile();
-    while (file)
-    {
-        if (file.isDirectory())
-        {
+    while (file) {
+        if (file.isDirectory()) {
             Serial.print("  DIR : ");
             Serial.println(file.name());
-        }
-        else
-        {
+        } else {
             Serial.print("  FILE: ");
             Serial.print(file.name());
             Serial.print("\tSIZE: ");
@@ -75,62 +124,58 @@ void setup() {
         }
         file = root.openNextFile();
     }
+}
 
-    // remove existing file
-    LittleFS.remove("/test.db");
+void initMQTT() {
+    setup_mqtt(client, mqtt_server, mqtt_port);
+    mqtt_subscribe(client, "your/topic");
+}
 
+void initDatabase() {
     sqlite3_initialize();
-
-    if (!db_open("/littlefs/test.db", &db1))
-        return;
-
-
-    // Database operations
-    sqlite3 *db1;
     if (!db_open("/littlefs/test.db", &db1)) return;
 
-    // Create tables if they don't exist
-    int tableExists = 0;
-    char *zErrMsg = 0;
-    int rc = sqlite3_exec(db1, "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='puce';", queryResultCallback, &tableExists, & zErrMsg);
-    if (rc != SQLITE_OK) {
-        Serial.printf("Error executing SQL query: %s\n", zErrMsg);
-        sqlite3_free( zErrMsg);
-        sqlite3_close(db1);
-        return;
-    } else {
-        Serial.printf("Table exists (1 -> yes /0 -> no): %i\n", tableExists);
-        if (!tableExists) {
-            Serial.println("The puce table does not exist yet.");
-            rc = db_exec(db1, "CREATE TABLE puce (id_puce INTEGER PRIMARY KEY NOT NULL, statut TEXT NOT NULL, Alias TEXT NOT NULL, Date_expiration DATE NOT NULL, Id_utilisateur INTEGER NOT NULL, date_added DATE DEFAULT CURRENT_DATE)");
-            if (rc != SQLITE_OK) {
-                sqlite3_close(db1);
-                return;
-            }
-            Serial.println("Table created successfully");
-        }
-        Serial.println("The puce table exists.");
-        rc = db_exec(db1, "INSERT INTO puce (id_puce, statut, Alias, Date_expiration, Id_utilisateur) VALUES (1, 'V', 'Rania_KZ', '2024-04-18', 12345);");
-        if (rc != SQLITE_OK) {
-            sqlite3_close(db1);
-            return;
-        }
-    }
+    createPuceTable(db1);
+    createTimeZoneTable(db1);
+    createEventTable(db1);
+    createSystemSettingTable(db1);
+    createStateTable(db1);
 
     sqlite3_close(db1);
 }
 
-void loop() {
-    printLocalTime();
-    delay(1000);
-}
+void processRFIDData() {
+    int num_puce = getRFIDData(); // Function to get RFID data
+    char num_state_p[10] = ""; // Initialize state variable
 
-void printLocalTime() {
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo)) {
-        Serial.println("Failed to obtain time");
-        return;
+    // Check RFID data and time zone authorization
+    sqlite3 *db = initializeDatabase(); // Initialize your SQLite database
+    checkPuceVIPStatus(db, num_puce, num_state_p);
+    verifyTimeZone(db, num_puce, num_state_p);
+
+    // Control LED signals based on the checks
+    if (strcmp(num_state_p, "1000") == 0) {
+        // Green LED high for 5 seconds
+        turnOnGreenLED();
+        delay(5000); // Delay for 5 seconds
+
+        // Red LED high for 2 seconds after 10 seconds
+        delay(5000); // Delay for 5 seconds
+        turnOffGreenLED();
+        turnOnRedLED();
+        delay(2000); // Delay for 2 seconds
+
+        // Save data in table_state
+        saveStateInTable(db, num_state_p);
+    } else {
+        // Red LED high for 2 seconds
+        turnOnRedLED();
+        delay(2000); // Delay for 2 seconds
+
+        // Save state in table_state
+        saveStateInTable(db, num_state_p);
     }
-    Serial.print(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-    Serial.println();
+
+    // Close the database connection
+    closeDatabase(db);
 }
