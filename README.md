@@ -1,82 +1,89 @@
-# AccessControlDoor 🔐
+# 🔐 AccessControlDoor — ESP32 Smart Door Access Control System
 
-AccessControlDoor is an ESP32‑based smart door access control system built with PlatformIO.
-It is structured for scalable firmware development, filesystem‑based web UI/config, and easy customization for different hardware setups.
-
----
-
-## Features
-
-- **ESP32 firmware** using PlatformIO (C/C++) for reliable embedded development.
-- **Modular structure** with `src`, `include`, `lib`, and `test` for clean, maintainable code.
-- **LittleFS support** via `data/littlefs/` for storing web assets, configuration files, and other runtime data.
-- Ready to integrate **door lock drivers** (relay, MOSFET, etc.) and authentication peripherals (keypad, RFID, sensors).
-- VS Code **debug/build setup** through `.vscode` and `platformio.ini` for a smooth developer experience.
+AccessControlDoor is an ESP32-based smart door access control firmware built with PlatformIO for scalable, modular embedded development. This project serves as a flexible foundation for building embedded access control systems with customizable authentication and hardware interfaces.
 
 ---
 
-## Project Structure
+## 🚀 Key Features
+
+- 🧠 **Built for ESP32** using PlatformIO (C/C++)
+- 🧩 **Modular directory structure** (src, include, lib, test)
+- 💾 **LittleFS filesystem support** for storing web UI assets and configs
+- 🧪 **Fully integrated** with PlatformIO development workflow
+- ⚙️ **Pre-configured VS Code** debug/build setup
+- 🖥️ **Optional web UI and config** via LittleFS
+- 🔌 **Easy integration** of:
+  - Door lock drivers (relay / MOSFET)
+  - Authentication peripherals (keypad / RFID)
+  - Sensors (magnetic / reed / PIR)
+
+---
+
+## 📂 Project Structure
 
 ```
 AccessControlDoor/
-├─ .vscode/          # VS Code + PlatformIO settings
+├─ .vscode/          # VS Code + PlatformIO configs
 ├─ data/
-│  └─ littlefs/      # Filesystem image content (web UI, JSON configs, etc.)
+│  └─ littlefs/      # Filesystem content (web UI, JSON configs, etc.)
 ├─ include/          # Header files for modules and configuration
-├─ lib/              # Reusable libraries / 3rd‑party components
-├─ src/              # Main firmware source code
-├─ test/             # Unit / integration tests (PlatformIO)
-└─ platformio.ini    # PlatformIO environments & board configuration
+├─ lib/              # Reusable libraries / 3rd-party components
+├─ src/              # Main firmware code
+├─ test/             # Unit & integration tests (PlatformIO)
+├─ platformio.ini    # Build environments & board configuration
+└─ README.md         # This file
 ```
 
 ---
 
-## Requirements
+## 🧰 Requirements
 
-### Hardware
+### 🔌 Hardware
 
-- ESP32 development board compatible with the configuration in `platformio.ini`.
-- Door‑lock driving hardware (relay module, MOSFET driver, or dedicated lock controller).
-- Optional: keypad, RFID/NFC reader, magnetic/reed sensors, or other access peripherals.
+- **ESP32 development board** compatible with your setup
+- **Door lock driver** (relay / MOSFET / external controller)
+- **Optional peripherals**:
+  - Keypad / RFID reader
+  - Magnetic / reed sensor
+  - LEDs / buzzer indicators
 
-### Software
+### 💻 Software
 
-- [VS Code](https://code.visualstudio.com/) with the PlatformIO extension **or** PlatformIO Core (CLI).
-- Git (for cloning and version control).
+- **VS Code** with PlatformIO extension **OR** PlatformIO Core (CLI)
+- **Git** (for cloning and version control)
+- **USB cable** for ESP32 programming
 
 ---
 
-## Getting Started
+## 📦 Getting Started
 
-### 1. Clone the repository
+### 1️⃣ Clone this repository
 
 ```bash
 git clone https://github.com/AE707/AccessControlDoor.git
 cd AccessControlDoor
 ```
 
-### 2. Open in PlatformIO
+### 2️⃣ Open in PlatformIO
 
-- Open the folder in VS Code.
-- PlatformIO will automatically read `platformio.ini` and install the required toolchains and libraries.
+- Open folder in **VS Code**
+- **PlatformIO will install** required frameworks automatically
 
-### 3. Build the firmware
+### 3️⃣ Build firmware
 
 ```bash
 pio run
 ```
 
-### 4. Upload the firmware
-
-Connect the ESP32 via USB, then:
+### 4️⃣ Upload firmware to ESP32
 
 ```bash
 pio run --target upload
 ```
 
-### 5. Upload LittleFS filesystem (optional but recommended)
+### 5️⃣ Upload LittleFS (optional)
 
-If you use the `data/littlefs/` folder for web UI or configs:
+If you use the `data/littlefs/` directory for web UI/config files:
 
 ```bash
 pio run --target uploadfs
@@ -84,56 +91,37 @@ pio run --target uploadfs
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
-- Adjust the **board**, **upload speed**, and other parameters in `platformio.ini` to match your ESP32 board.
-- Place web assets (HTML/CSS/JS) and configuration files under `data/littlefs/` so they are available on the ESP32 at runtime.
-- Implement or customize:
-  - Authentication logic (PIN codes, card IDs, etc.) in `src/`
-  - Door lock control (relay timing, lock/unlock patterns)
-  - Logging, alerts, and any network features (Wi‑Fi, HTTP, MQTT, etc.)
-
----
-
-## Development Notes
-
-- Use the `include/` directory for shared headers to keep interfaces clear between modules.
-- Place reusable code or external libraries in `lib/` to avoid cluttering `src/`.
-- Add tests in `test/` and run them with PlatformIO's test runner to validate critical logic.
+- **Update `platformio.ini`** to match your specific ESP32 board and upload settings
+- **Add or customize** web UI assets and JSON configs under `data/littlefs/`
+- **Implement or extend**:
+  - Authentication logic (PIN, RFID tag list, etc.)
+  - Door lock timing, alert logic, feedback mechanisms
+  - Networking (HTTP, Wi-Fi management, MQTT, REST API)
 
 ---
 
-## Roadmap / Ideas
+## 📈 Development Notes
 
-You can extend the project with:
-
-- Web dashboard for door status, logs, and user management (served from LittleFS).
-- Integration with MQTT or REST APIs for remote monitoring and control.
-- Support for multiple authentication methods (RFID, keypad, mobile app).
-- OTA updates for remote firmware deployment.
+- Use `include/` for shared headers and interfaces
+- Place reusable external libraries in `lib/`
+- Add tests to `test/` and execute using PlatformIO's test runner
+- Use **LittleFS** for serving web UI and storing device configs
 
 ---
 
-## License
+## 🔐 Access Control Door System (Embedded)
 
-This project is released under the **MIT License**.
-You are free to use, modify, and distribute it, with proper attribution to the original author.
-
----
-
-# 🔐 Access Control Door System (Embedded)
-
-An embedded system project for controlling and securing door access using authentication mechanisms and microcontroller-based logic.
-This project demonstrates core embedded concepts such as GPIO control, input validation, state management, and hardware–software integration.
+An embedded system project for controlling and securing door access using authentication mechanisms and microcontroller-based logic. This project demonstrates core embedded concepts such as GPIO control, input validation, state management, and hardware–software integration.
 
 ---
 
-## 📌 Project Overview
+## 📌 System Overview
 
-The **Access Control Door System** is designed to allow or deny access based on predefined authorization rules.
-It simulates a real-world access control solution commonly used in offices, labs, and secured areas.
+The **Access Control Door System** is designed to allow or deny access based on predefined authorization rules. It simulates a real-world access control solution commonly used in offices, labs, and secured areas.
 
-Key goals of the project:
+**Key goals of the project:**
 - Secure door access
 - Reliable authentication handling
 - Clear system states (idle, access granted, access denied)
@@ -141,24 +129,24 @@ Key goals of the project:
 
 ---
 
-## 🧠 System Features
+## 🧠 System Features & Architecture
 
-- 🔑 User authentication (e.g. keypad / ID input)
-- 🚪 Door lock control (relay / motor / solenoid logic)
-- 🔔 Status indicators (LEDs / buzzer)
-- ⏱️ Timed access and auto-lock
-- ⚠️ Invalid access detection
-- 🔄 Reset and retry mechanism
+### Core Features
 
----
+- 🔑 **User authentication** (keypad / ID input)
+- 🚪 **Door lock control** (relay / motor / solenoid logic)
+- 🔔 **Status indicators** (LEDs / buzzer)
+- ⏱️ **Timed access and auto-lock**
+- ⚠️ **Invalid access detection**
+- 🔄 **Reset and retry mechanism**
 
-## 🏗️ System Architecture
+### System Architecture
 
 ```
 ESP32 Microcontroller with:
-- Input I/O: Keypad, RFID Reader, Buttons
+- Input I/O:  Keypad, RFID Reader, Buttons
 - Output I/O: Door Lock (Relay), LED Status, Buzzer
-- Access Control State Machine (IDLE -> VALIDATE -> GRANT/DENY -> AUTO_LOCK)
+- Access Control State Machine (IDLE → VALIDATE → GRANT/DENY → AUTO_LOCK)
 - Authentication Manager (Credential Storage & Validation)
 - Timer & Lock Control Module (Auto-lock after timeout)
 ```
@@ -167,44 +155,29 @@ ESP32 Microcontroller with:
 
 ## 🚀 How It Works
 
-1. **Idle State**: System waits for user input.
-2. **User Input**: User provides PIN, RFID card, or ID.
-3. **Validation**: System checks input against stored credentials.
+1. **Idle State**: System waits for user input
+2. **User Input**: User provides PIN, RFID card, or ID
+3. **Validation**: System checks input against stored credentials
 4. **Access Granted**:
-   - Door unlocks (relay/solenoid activates for defined duration).
-   - Green LED indicator illuminates.
-   - Optional buzzer beep.
+   - Door unlocks (relay/solenoid activates for defined duration)
+   - Green LED indicator illuminates
+   - Optional buzzer beep
 5. **Access Denied**:
-   - Door remains locked.
-   - Red LED indicator illuminates.
-   - Alert buzzer sounds (multiple beeps).
-6. **Auto-Lock**: Door automatically locks after timeout.
-7. **Return to Idle**: System resets and waits for next input.
+   - Door remains locked
+   - Red LED indicator illuminates
+   - Alert buzzer sounds (multiple beeps)
+6. **Auto-Lock**: Door automatically locks after timeout
+7. **Return to Idle**: System resets and waits for next input
 
 ---
 
 ## 🧪 Testing & Validation
 
-- **Functional Testing**: Verify valid/invalid access scenarios.
-- **Timing Verification**: Confirm auto-lock behavior and delays.
-- **Input Edge-Case Handling**: Test boundary conditions (empty input, partial codes, etc.).
-- **Hardware Signal Validation**: Verify GPIO states for locks, LEDs, and indicators.
-- **State Transition Testing**: Ensure system flows correctly through all states.
-
----
-
-## 🔮 Future Improvements
-
-- **Multi-factor Authentication**: Combine PIN + RFID for enhanced security.
-- **User Management Dashboard**: Add/remove users and modify access permissions.
-- **Audit Logging**: Store access attempts (successful & failed) with timestamps.
-- **Wireless Integration**: Connect via Wi-Fi/Bluetooth for remote monitoring.
-- **Cloud Sync**: Sync credentials with cloud for centralized access control.
-- **Biometric Support**: Integrate fingerprint or facial recognition.
-- **Emergency Override**: Master key or emergency bypass mechanism.
-- **SMS/Email Alerts**: Notify administrators of unauthorized access attempts.
-- **Multiple Door Support**: Extend to control and monitor multiple doors.
-- **OTA Updates**: Deploy firmware updates over the network.
+- **Functional Testing**: Verify valid/invalid access scenarios
+- **Timing Verification**: Confirm auto-lock behavior and delays
+- **Input Edge-Case Handling**: Test boundary conditions (empty input, partial codes, etc.)
+- **Hardware Signal Validation**: Verify GPIO states for locks, LEDs, and indicators
+- **State Transition Testing**: Ensure system flows correctly through all states
 
 ---
 
@@ -284,35 +257,28 @@ bool validateCredentials(String input) {
 
 ```
 IDLE (Wait for input)
-  |
-  v (User provides PIN/ID)
+  ↓ (User provides PIN/ID)
 VALIDATING (Check credentials)
-  |
-  +---> ACCESS_GRANTED (Valid)
-  |        |
-  |        v
-  |     Unlock Door
-  |     Green LED ON
-  |     Play Success Beep
-  |        |
-  |        v (5 sec timeout)
-  |     AUTO_LOCK
-  |        |
-  |        v
-  |     Lock Door
-  |     LED OFF
-  |        |
-  |        +---> IDLE
-  |
-  +---> ACCESS_DENIED (Invalid)
-           |
-           v
-        Lock Door (stays)
-        Red LED ON
-        Play Alert Beep
-           |
-           v (2 sec delay)
-        IDLE (reset attempts)
+  ├─→ ACCESS_GRANTED (Valid)
+  │     ↓
+  │   Unlock Door
+  │   Green LED ON
+  │   Play Success Beep
+  │     ↓ (5 sec timeout)
+  │   AUTO_LOCK
+  │     ↓
+  │   Lock Door
+  │   LED OFF
+  │     ↓
+  │   └──→ IDLE
+  │
+  └─→ ACCESS_DENIED (Invalid)
+        ↓
+      Lock Door (stays)
+      Red LED ON
+      Play Alert Beep
+        ↓ (2 sec delay)
+      IDLE (reset attempts)
 ```
 
 ### Timing Parameters
@@ -327,3 +293,36 @@ VALIDATING (Check credentials)
 | GPIO_DELAY | 10ms | Relay activation delay |
 
 ---
+
+## 💡 Roadmap & Future Enhancements
+
+You can enhance this project with:
+
+- 📡 **Web dashboard** for status & user management (hosted via LittleFS)
+- 📶 **Networking** (MQTT, REST API, remote control)
+- 🔐 **Multi-factor authentication** (PIN + RFID combined)
+- 🛠️ **Multiple authentication methods** (RFID, BLE, mobile app)
+- 🔄 **OTA-based firmware updates**
+- 📊 **Logging and event history** (audit trail)
+- 🌐 **Cloud synchronization** for centralized management
+- 🔏 **Emergency override** mechanisms
+- 🔔 **SMS/Email alerts** for unauthorized attempts
+- 🏢 **Multi-door support** for larger installations
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License** — you are free to use, modify, and share it with proper attribution.
+
+---
+
+## 🙌 About the Author
+
+**Alaa Elghoul** — Embedded / Firmware Developer
+
+**GitHub Profile:** [https://github.com/AE707](https://github.com/AE707)
+
+---
+
+*Last Updated: January 2026*
