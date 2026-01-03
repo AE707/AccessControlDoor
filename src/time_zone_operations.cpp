@@ -1,9 +1,20 @@
 #include "time_zone_operations.h"
 #include "db_operations.h"
+#include "puce_operations.h"
 #include <Arduino.h>
+#include <PubSubClient.h>
+
+
+
+unsigned long parseTimeString(const char* timeStr) {
+    int hours, minutes, seconds;
+    sscanf(timeStr, "%d:%d:%d", &hours, &minutes, &seconds);
+    return hours * 3600 + minutes * 60 + seconds;
+}
 
 void verifyTimeZone(sqlite3 *db1, int num_puce, char *num_state_p) {
     // Fetch time_zone data from the database
+    
     fetchTimeZoneData(db1, "SELECT * FROM time_zone WHERE id_puce = ?", num_puce);
 
     // Get the current time
@@ -31,16 +42,3 @@ void verifyTimeZone(sqlite3 *db1, int num_puce, char *num_state_p) {
     num_state_p += '0100'; // Set the unauthorized time zone flag in num_state_p
 }
 
-// Helper function to parse a time string in the format "HH:MM:SS" to seconds since midnight
-unsigned long parseTimeString(const char* timeString) {
-    int hours, minutes, seconds;
-    sscanf(timeString, "%d:%d:%d", &hours, &minutes, &seconds);
-    return hours * 3600 + minutes * 60 + seconds;
-}
-
-// Helper function to get the current day of the week (1-7, where 1 is Monday and 7 is Sunday)
-int getCurrentDayOfWeek() {
-    // Implement a function to get the current day of the week based on your system's date/time
-    // This example assumes a simple implementation using millis()
-    return ((millis() / (24 * 3600 * 1000)) % 7) + 1;
-}

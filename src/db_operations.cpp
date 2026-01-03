@@ -1,5 +1,12 @@
 #include "db_operations.h"
 #include <Arduino.h>
+#include <PubSubClient.h>
+#include "mqtt_operations.h"
+#include <config_ext.h>
+
+int db_open(char const*, sqlite3**);
+int db_exec(sqlite3*, char const*);
+int queryResultCallback(void*, int, char**, char**);
 
 // Function to insert puce data from MQTT into the database
 void insertPuceDataFromMQTT(sqlite3 *db, const char* topic, byte* payload, unsigned int length) {

@@ -1,6 +1,10 @@
 #include "puce_operations.h"
 #include "db_operations.h"
 #include <Arduino.h>
+#include <PubSubClient.h>
+
+char *zErrMsg = nullptr;
+
 
 void checkPuceVIPStatus(sqlite3 *db, int num_puce, char *num_state_p) {
     char sql_query[100];
@@ -26,7 +30,7 @@ void checkPuceVIPStatus(sqlite3 *db, int num_puce, char *num_state_p) {
     }
 }
 
-void handlePuceStatus(sqlite3 *db1, int num_puce, char *num_state_p, PubSubClient& client) {
+void handlePuceStatus(sqlite3 *db1, int num_puce, char *num_state_p, PubSubClient client) {
     checkPuceVIPStatus(db1, num_puce, num_state_p);
 
     // Fetch puce data from the database
@@ -42,7 +46,7 @@ void handlePuceStatus(sqlite3 *db1, int num_puce, char *num_state_p, PubSubClien
         num_state_p += '0111';
         // Insert event data
         char event_query[200];
-        sprintf(event_query, "INSERT INTO event (puce_id, event_type, event_time) VALUES (%d, %d, CURRENT_TIMESTAMP);", num_puce, 7);
+        sprintf(event_query, "INSERT INTO event (id_event , id_puce , state , date_heure_access) VALUES (%d, %d, %d, CURRENT_TIMESTAMP);", num_puce, 7, num_state_p);
         insertEventData(db1, event_query);
     } else {
         // Check VIP status
@@ -60,7 +64,7 @@ void handlePuceStatus(sqlite3 *db1, int num_puce, char *num_state_p, PubSubClien
                 num_state_p += '0010';
                 // Insert event data
                 char event_query[200];
-                sprintf(event_query, "INSERT INTO event (puce_id, event_type, event_time) VALUES (%d, %d, CURRENT_TIMESTAMP);", num_puce, 2);
+                sprintf(event_query, "INSERT INTO event (id_event , id_puce , state , date_heure_access) VALUES (%d, %d, %d, CURRENT_TIMESTAMP);", num_puce, 2, num_state_p);
                 insertEventData(db1, event_query);
             } else {
                 // Check Desactiver status
@@ -71,7 +75,7 @@ void handlePuceStatus(sqlite3 *db1, int num_puce, char *num_state_p, PubSubClien
                     num_state_p += '0011';
                     // Insert event data
                     char event_query[200];
-                    sprintf(event_query, "INSERT INTO event (puce_id, event_type, event_time) VALUES (%d, %d, CURRENT_TIMESTAMP);", num_puce, 3);
+                    sprintf(event_query, "INSERT INTO event (id_event , id_puce , state , date_heure_access) VALUES (%d, %d, %d, CURRENT_TIMESTAMP);", num_puce, 3, num_state_p);
                     insertEventData(db1, event_query);
                 } else {
                     // Fetch time_zone data from the database
@@ -84,7 +88,7 @@ void handlePuceStatus(sqlite3 *db1, int num_puce, char *num_state_p, PubSubClien
     }
 
     // Insert state data
-    char state_query[200];
-    sprintf(state_query, "INSERT INTO state (state_name, state_code) VALUES ('state_name', '%s');", num_state_p);
-    insertStateData(db1, state_query);
+    //char state_query[200];
+    //sprintf(state_query, "INSERT INTO state (state_name, state_code) VALUES ('state_name', '%s');", num_state_p);
+    //insertStateData(db1, state_query);
 }
