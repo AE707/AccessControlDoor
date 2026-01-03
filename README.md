@@ -1,6 +1,7 @@
 # 🔐 AccessControlDoor — ESP32 Smart Door Access Control System
 
-AccessControlDoor is an ESP32-based smart door access control firmware built with PlatformIO for scalable, modular embedded development. This project serves as a flexible foundation for building embedded access control systems with customizable authentication and hardware interfaces.
+AccessControlDoor is an ESP32-based access control firmware built with PlatformIO, designed for secure and modular embedded door systems.
+The project showcases key embedded concepts including GPIO control, authentication logic, state management, and hardware–software integration.
 
 ---
 
@@ -111,15 +112,9 @@ pio run --target uploadfs
 
 ---
 
-## 🔐 Access Control Door System (Embedded)
-
-An embedded system project for controlling and securing door access using authentication mechanisms and microcontroller-based logic. This project demonstrates core embedded concepts such as GPIO control, input validation, state management, and hardware–software integration.
-
----
-
 ## 📌 System Overview
 
-The **Access Control Door System** is designed to allow or deny access based on predefined authorization rules. It simulates a real-world access control solution commonly used in offices, labs, and secured areas.
+The system allows or denies door access based on predefined authorization rules, simulating real-world secure entry systems used in offices, labs, and restricted areas.
 
 **Key goals of the project:**
 - Secure door access
@@ -150,6 +145,8 @@ ESP32 Microcontroller with:
 - Authentication Manager (Credential Storage & Validation)
 - Timer & Lock Control Module (Auto-lock after timeout)
 ```
+
+⚠️ Some features described represent the intended architecture and design goals; implementation may evolve as the project progresses.
 
 ---
 
@@ -184,6 +181,10 @@ ESP32 Microcontroller with:
 ## 🧬 Algorithm Logic
 
 ### Authentication Flow (Pseudocode)
+
+**Note:** The following pseudocode illustrates the system logic and state machine design.  
+          Actual implementation details may differ depending on hardware configuration.
+
 
 ```c
 // Access Control State Machine
