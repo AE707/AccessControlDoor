@@ -1,4 +1,9 @@
 # 🔐 AccessControlDoor — ESP32 Smart Door Access Control System
+![Platform](https://img.shields.io/badge/platform-ESP32-blue)
+![Framework](https://img.shields.io/badge/framework-PlatformIO-orange)
+![Language](https://img.shields.io/badge/language-C%2FC%2B%2B-green)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
 
 AccessControlDoor is an ESP32-based access control firmware built with PlatformIO, designed for secure and modular embedded door systems.
 The project showcases key embedded concepts including GPIO control, authentication logic, state management, and hardware–software integration.
@@ -309,6 +314,16 @@ You can enhance this project with:
 - 🔏 **Emergency override** mechanisms
 - 🔔 **SMS/Email alerts** for unauthorized attempts
 - 🏢 **Multi-door support** for larger installations
+
+
+## 📍 Implementation Status
+
+- ✅ Core state machine
+- ✅ GPIO control (lock, LEDs, buzzer)
+- ✅ Basic authentication logic
+- ⚠️ Web UI (planned / partial)
+- ⚠️ Networking features (future work)
+
 
 ---
 
